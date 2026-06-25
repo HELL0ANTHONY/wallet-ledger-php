@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - composer-cache:/tmp/composer-cache
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_PORT: ${APP_PORT}
+      DATABASE_DSN: ${DATABASE_DSN}
+      DATABASE_PATH: ${DATABASE_PATH}
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
+    ports:
+      - "${APP_PORT}:8080"
+    command: php -S 0.0.0.0:8080 -t public
+
+volumes:
+  composer-cache:

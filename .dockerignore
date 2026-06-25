@@ -1,0 +1,9 @@
+.git
+.devcontainer
+.env
+.env.*
+!.env.example
+vendor
+var
+.phpunit.cache
+.phpstan
