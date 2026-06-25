@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace WalletLedger\Application\Ledger\Repository;
 
-use WalletLedger\Application\Ledger\DTO\StoredIdempotentResponse;
+use WalletLedger\Application\Ledger\DTO\StoredIdempotentMutation;
 use WalletLedger\Domain\Ledger\IdempotencyKey;
 
 interface IdempotencyRepository
 {
-    public function find(IdempotencyKey $key): ?StoredIdempotentResponse;
+    public function find(IdempotencyKey $key): ?StoredIdempotentMutation;
 
-    public function save(IdempotencyKey $key, StoredIdempotentResponse $response): void;
+    public function save(IdempotencyKey $key, StoredIdempotentMutation $mutation): void;
 }

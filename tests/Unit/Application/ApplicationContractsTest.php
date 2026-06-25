@@ -9,7 +9,7 @@ use WalletLedger\Application\Account\DTO\AccountOutput;
 use WalletLedger\Application\Account\DTO\CreateAccountInput;
 use WalletLedger\Application\Ledger\DTO\LedgerEntryOutput;
 use WalletLedger\Application\Ledger\DTO\MutationOutput;
-use WalletLedger\Application\Ledger\DTO\StoredIdempotentResponse;
+use WalletLedger\Application\Ledger\DTO\StoredIdempotentMutation;
 
 final class ApplicationContractsTest extends TestCase
 {
@@ -47,14 +47,19 @@ final class ApplicationContractsTest extends TestCase
         self::assertSame($entry, $output->ledgerEntries[0]);
     }
 
-    public function test_stored_idempotent_response_is_explicit(): void
+    public function test_stored_idempotent_mutation_is_explicit(): void
     {
-        $response = new StoredIdempotentResponse(
-            responseCode: 201,
-            responseBody: '{"status":"ok"}',
+        $mutation = new StoredIdempotentMutation(
+            requestHash: 'hash_123',
+            output: new MutationOutput(
+                operationId: 'op_123',
+                balance: 15000,
+                currency: 'ARS',
+                ledgerEntries: [],
+            ),
         );
 
-        self::assertSame(201, $response->responseCode);
-        self::assertSame('{"status":"ok"}', $response->responseBody);
+        self::assertSame('hash_123', $mutation->requestHash);
+        self::assertSame('op_123', $mutation->output->operationId);
     }
 }

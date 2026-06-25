@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace WalletLedger\Application\Ledger\DTO;
 
-final readonly class StoredIdempotentResponse
+final readonly class StoredIdempotentMutation
 {
     public function __construct(
-        public int $responseCode,
-        public string $responseBody,
+        public string $requestHash,
+        public MutationOutput $output,
     ) {}
 }
