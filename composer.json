@@ -8,6 +8,7 @@
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.75",
+    "phpunit/phpunit": "^11.5",
     "phpstan/phpstan": "^2.1",
     "phpstan/phpstan-strict-rules": "^2.0"
   },
@@ -25,9 +26,11 @@
     "format": "php-cs-fixer fix --config=.php-cs-fixer.php",
     "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff",
     "lint": "phpstan analyse --configuration=phpstan.neon",
+    "test": "phpunit --configuration=phpunit.xml",
     "check": [
       "@format:check",
-      "@lint"
+      "@lint",
+      "@test"
     ]
   },
   "config": {
