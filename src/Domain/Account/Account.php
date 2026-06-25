@@ -24,6 +24,14 @@ final class Account
         return new self($id, $currency);
     }
 
+    public static function restore(AccountId $id, Currency $currency, Money $balance): self
+    {
+        $account = new self($id, $currency);
+        $account->balance = $balance;
+
+        return $account;
+    }
+
     public function balance(): Money
     {
         return $this->balance;
