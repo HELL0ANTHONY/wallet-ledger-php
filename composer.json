@@ -1,0 +1,37 @@
+{
+  "name": "portfolio/wallet-ledger-php",
+  "description": "REST API for a wallet ledger built with modern PHP.",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": "^8.3"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.75",
+    "phpstan/phpstan": "^2.1",
+    "phpstan/phpstan-strict-rules": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "WalletLedger\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WalletLedger\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "format": "php-cs-fixer fix --config=.php-cs-fixer.php",
+    "format:check": "php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff",
+    "lint": "phpstan analyse --configuration=phpstan.neon",
+    "check": [
+      "@format:check",
+      "@lint"
+    ]
+  },
+  "config": {
+    "allow-plugins": {},
+    "sort-packages": true
+  }
+}

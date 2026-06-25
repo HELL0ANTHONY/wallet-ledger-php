@@ -7,7 +7,8 @@ RUN apt-get update \
         git \
         unzip \
         sqlite3 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && git config --system --add safe.directory /workspace
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

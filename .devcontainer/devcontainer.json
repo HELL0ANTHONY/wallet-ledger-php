@@ -6,6 +6,7 @@
   "shutdownAction": "stopCompose",
 
   "overrideCommand": true,
+  "postCreateCommand": "git config --global --add safe.directory /workspace && composer install",
 
   "customizations": {
     "vscode": {
