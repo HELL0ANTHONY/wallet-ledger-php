@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use WalletLedger\Infrastructure\Config\SettingsFactory;
-
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$settings = (new SettingsFactory())->fromGlobals();
+$createApp = require __DIR__ . '/../config/app.php';
+if (!is_callable($createApp)) {
+    throw new RuntimeException('App config must return a callable.');
+}
 
-header('Content-Type: application/json');
+$app = $createApp();
+if (!$app instanceof Slim\App) {
+    throw new RuntimeException('App config must return a Slim app.');
+}
 
-echo json_encode([
-    'environment' => $settings->app->environment->value,
-    'service' => 'wallet-ledger-php',
-    'status' => 'ok',
-], JSON_THROW_ON_ERROR);
+$app->run();

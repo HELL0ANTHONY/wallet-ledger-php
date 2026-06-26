@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WalletLedger\Infrastructure\Config;
 
+use function str_starts_with;
+
 final readonly class DatabaseConfig
 {
     public function __construct(
@@ -17,5 +19,19 @@ final readonly class DatabaseConfig
         if ($this->path === '') {
             throw InvalidConfigurationException::invalid(EnvironmentVariables::DATABASE_PATH, 'a non-empty filesystem path');
         }
+    }
+
+    public function withProjectRoot(string $projectRoot): self
+    {
+        if ($this->path === ':memory:' || str_starts_with($this->path, '/')) {
+            return $this;
+        }
+
+        $absolutePath = $projectRoot . '/' . $this->path;
+
+        return new self(
+            dsn: str_starts_with($this->dsn, 'sqlite:') ? 'sqlite:' . $absolutePath : $this->dsn,
+            path: $absolutePath,
+        );
     }
 }

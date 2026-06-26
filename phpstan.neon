@@ -6,6 +6,8 @@ parameters:
     level: max
     phpVersion: 80300
     paths:
+        - bin
+        - config
         - public
         - src
         - tests

@@ -101,6 +101,7 @@ $RECYCLE.BIN/
 
 /vendor/
 /var/
+/public/var/
 !/var/
 /var/*
 !/var/cache/
