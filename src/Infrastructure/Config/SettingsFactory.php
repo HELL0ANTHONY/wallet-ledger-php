@@ -6,7 +6,6 @@ namespace WalletLedger\Infrastructure\Config;
 
 use function array_key_exists;
 use function is_bool;
-use function is_int;
 
 final readonly class SettingsFactory
 {
@@ -43,16 +42,10 @@ final readonly class SettingsFactory
             throw InvalidConfigurationException::invalid(EnvironmentVariables::APP_DEBUG, 'a boolean value');
         }
 
-        $port = filter_var($values[EnvironmentVariables::APP_PORT], FILTER_VALIDATE_INT);
-        if (!is_int($port)) {
-            throw InvalidConfigurationException::invalid(EnvironmentVariables::APP_PORT, 'an integer TCP port');
-        }
-
         return new Settings(
             app: new AppConfig(
                 environment: $environment,
                 debug: $debug,
-                port: $port,
             ),
             database: new DatabaseConfig(
                 dsn: $values[EnvironmentVariables::DATABASE_DSN],

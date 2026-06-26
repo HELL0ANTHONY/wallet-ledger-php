@@ -8,7 +8,6 @@ final class EnvironmentVariables
 {
     public const string APP_DEBUG = 'APP_DEBUG';
     public const string APP_ENV = 'APP_ENV';
-    public const string APP_PORT = 'APP_PORT';
     public const string DATABASE_DSN = 'DATABASE_DSN';
     public const string DATABASE_PATH = 'DATABASE_PATH';
 
@@ -20,7 +19,6 @@ final class EnvironmentVariables
         return [
             self::APP_ENV,
             self::APP_DEBUG,
-            self::APP_PORT,
             self::DATABASE_DSN,
             self::DATABASE_PATH,
         ];

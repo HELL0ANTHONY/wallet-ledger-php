@@ -18,7 +18,6 @@ final class SettingsFactoryTest extends TestCase
 
         self::assertSame(AppEnvironment::Local, $settings->app->environment);
         self::assertTrue($settings->app->debug);
-        self::assertSame(8080, $settings->app->port);
         self::assertSame('sqlite:var/wallet-ledger.sqlite', $settings->database->dsn);
         self::assertSame('var/wallet-ledger.sqlite', $settings->database->path);
     }
@@ -56,17 +55,6 @@ final class SettingsFactoryTest extends TestCase
         (new SettingsFactory())->fromArray($values);
     }
 
-    public function test_it_rejects_invalid_port(): void
-    {
-        $values = $this->validValues();
-        $values[EnvironmentVariables::APP_PORT] = '70000';
-
-        $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage('Invalid environment variable APP_PORT');
-
-        (new SettingsFactory())->fromArray($values);
-    }
-
     /**
      * @return array<string, string>
      */
@@ -75,7 +63,6 @@ final class SettingsFactoryTest extends TestCase
         return [
             EnvironmentVariables::APP_ENV => 'local',
             EnvironmentVariables::APP_DEBUG => 'true',
-            EnvironmentVariables::APP_PORT => '8080',
             EnvironmentVariables::DATABASE_DSN => 'sqlite:var/wallet-ledger.sqlite',
             EnvironmentVariables::DATABASE_PATH => 'var/wallet-ledger.sqlite',
         ];
