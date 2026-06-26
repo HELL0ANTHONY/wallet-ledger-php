@@ -15,6 +15,7 @@ use WalletLedger\Application\Ledger\UseCase\DepositFunds;
 use WalletLedger\Application\Ledger\UseCase\ListAccountLedgerEntries;
 use WalletLedger\Domain\Account\Account;
 use WalletLedger\Domain\Account\AccountId;
+use WalletLedger\Domain\Account\Exception\AccountNotFound;
 use WalletLedger\Domain\Ledger\FinancialLedger;
 use WalletLedger\Domain\Money\Currency;
 use WalletLedger\Infrastructure\Config\DatabaseConfig;
@@ -84,7 +85,7 @@ final class SQLitePersistenceTest extends TestCase
         } catch (RuntimeException) {
         }
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(AccountNotFound::class);
         $this->expectExceptionMessage('Account not found: acc_123');
 
         $context->accounts->get(new AccountId('acc_123'));

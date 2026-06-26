@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+use InvalidArgumentException;
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Factory\AppFactory;
+use Throwable;
 use WalletLedger\Application\Account\UseCase\CreateAccount;
 use WalletLedger\Application\Account\UseCase\GetAccountBalance;
 use WalletLedger\Application\Ledger\Exception\IdempotencyConflict;
@@ -11,6 +15,7 @@ use WalletLedger\Application\Ledger\UseCase\DepositFunds;
 use WalletLedger\Application\Ledger\UseCase\ListAccountLedgerEntries;
 use WalletLedger\Application\Ledger\UseCase\TransferFunds;
 use WalletLedger\Application\Ledger\UseCase\WithdrawFunds;
+use WalletLedger\Domain\Account\Exception\AccountNotFound;
 use WalletLedger\Domain\Ledger\FinancialLedger;
 use WalletLedger\Domain\Shared\Exception\DomainException;
 use WalletLedger\Http\Controller\AccountController;
@@ -56,12 +61,48 @@ return static function (): Slim\App {
     $app = AppFactory::create();
     $app->addRoutingMiddleware();
 
+    $responder = new JsonResponder();
+    $responseFactory = $app->getResponseFactory();
     $errorMiddleware = $app->addErrorMiddleware(
         displayErrorDetails: $settings->app->environment === AppEnvironment::Local && $settings->app->debug,
         logErrors: true,
         logErrorDetails: true,
     );
-    $errorMiddleware->setDefaultErrorHandler(errorHandler($app->getResponseFactory(), new JsonResponder()));
+    $errorMiddleware->setDefaultErrorHandler(
+        static function (
+            ServerRequestInterface $request,
+            Throwable $exception,
+            bool $displayErrorDetails,
+            bool $logErrors,
+            bool $logErrorDetails,
+        ) use ($responseFactory, $responder): ResponseInterface {
+            unset($request, $displayErrorDetails, $logErrors, $logErrorDetails);
+
+            $status = match (true) {
+                $exception instanceof InvalidArgumentException,
+                $exception instanceof JsonException => 400,
+                $exception instanceof AccountNotFound => 404,
+                $exception instanceof IdempotencyConflict => 409,
+                $exception instanceof DomainException => 422,
+                default => 500,
+            };
+
+            $code = match ($status) {
+                400 => 'bad_request',
+                404 => 'not_found',
+                409 => 'conflict',
+                422 => 'business_rule_violation',
+                default => 'internal_server_error',
+            };
+
+            return $responder->respond($responseFactory->createResponse(), [
+                'error' => [
+                    'code' => $code,
+                    'message' => $status === 500 ? 'Unexpected server error.' : $exception->getMessage(),
+                ],
+            ], $status);
+        },
+    );
 
     $registerRoutes = require __DIR__ . '/routes.php';
     if (!is_callable($registerRoutes)) {
@@ -72,45 +113,3 @@ return static function (): Slim\App {
 
     return $app;
 };
-
-function errorHandler(
-    Psr\Http\Message\ResponseFactoryInterface $responseFactory,
-    JsonResponder $responder,
-): callable {
-    return static function (
-        Psr\Http\Message\ServerRequestInterface $request,
-        Throwable $exception,
-        bool $displayErrorDetails,
-        bool $logErrors,
-        bool $logErrorDetails,
-    ) use ($responseFactory, $responder): ResponseInterface {
-        unset($request, $displayErrorDetails, $logErrors, $logErrorDetails);
-
-        $status = match (true) {
-            $exception instanceof InvalidArgumentException,
-            $exception instanceof JsonException => 400,
-            $exception instanceof IdempotencyConflict => 409,
-            $exception instanceof DomainException => 422,
-            str_starts_with($exception->getMessage(), 'Account not found:') => 404,
-            default => 500,
-        };
-
-        return $responder->respond($responseFactory->createResponse(), [
-            'error' => [
-                'code' => errorCode($status),
-                'message' => $status === 500 ? 'Unexpected server error.' : $exception->getMessage(),
-            ],
-        ], $status);
-    };
-}
-
-function errorCode(int $status): string
-{
-    return match ($status) {
-        400 => 'bad_request',
-        404 => 'not_found',
-        409 => 'conflict',
-        422 => 'business_rule_violation',
-        default => 'internal_server_error',
-    };
-}

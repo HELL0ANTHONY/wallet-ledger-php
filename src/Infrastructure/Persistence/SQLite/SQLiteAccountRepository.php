@@ -7,10 +7,10 @@ namespace WalletLedger\Infrastructure\Persistence\SQLite;
 use DateTimeImmutable;
 use Override;
 use PDO;
-use RuntimeException;
 use WalletLedger\Application\Account\Repository\AccountRepository;
 use WalletLedger\Domain\Account\Account;
 use WalletLedger\Domain\Account\AccountId;
+use WalletLedger\Domain\Account\Exception\AccountNotFound;
 use WalletLedger\Domain\Money\Currency;
 use WalletLedger\Domain\Money\Money;
 
@@ -31,7 +31,7 @@ final readonly class SQLiteAccountRepository implements AccountRepository
         $row = $statement->fetch();
 
         if (!is_array($row)) {
-            throw new RuntimeException("Account not found: {$accountId->value}");
+            throw AccountNotFound::forId($accountId);
         }
 
         $currency = new Currency($this->rowReader->string($row, 'currency'));

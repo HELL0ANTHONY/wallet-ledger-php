@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace WalletLedger\Tests\Unit\Application\Support;
 
 use Override;
-use RuntimeException;
 use WalletLedger\Application\Account\Repository\AccountRepository;
 use WalletLedger\Domain\Account\Account;
 use WalletLedger\Domain\Account\AccountId;
+use WalletLedger\Domain\Account\Exception\AccountNotFound;
 
 final class InMemoryAccountRepository implements AccountRepository
 {
@@ -21,7 +21,7 @@ final class InMemoryAccountRepository implements AccountRepository
     public function get(AccountId $accountId): Account
     {
         return $this->accounts[$accountId->value]
-            ?? throw new RuntimeException("Account not found: {$accountId->value}");
+            ?? throw AccountNotFound::forId($accountId);
     }
 
     #[Override]

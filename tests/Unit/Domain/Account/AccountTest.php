@@ -58,4 +58,17 @@ final class AccountTest extends TestCase
 
         $account->deposit(Money::positive(5000, new Currency('USD')));
     }
+
+    public function test_it_restores_account_with_existing_balance(): void
+    {
+        $account = Account::restore(
+            new AccountId('acc_123'),
+            new Currency('ARS'),
+            Money::positive(25000, new Currency('ARS')),
+        );
+
+        self::assertSame('acc_123', $account->id->value);
+        self::assertSame('ARS', $account->currency->code);
+        self::assertSame(25000, $account->balance()->amount);
+    }
 }

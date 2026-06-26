@@ -130,6 +130,62 @@ final class LedgerUseCasesTest extends TestCase
         self::assertSame('credit', $toEntries->entries[0]->type);
     }
 
+    public function test_it_withdraws_funds_idempotently(): void
+    {
+        $context = $this->context();
+        $this->createAccount($context, 'acc_123', 'ARS');
+        $this->depositFunds($context)(new DepositFundsInput(
+            accountId: 'acc_123',
+            amount: 15000,
+            currency: 'ARS',
+            idempotencyKey: 'deposit-001',
+        ));
+
+        $useCase = $this->withdrawFunds($context);
+        $input = new WithdrawFundsInput(
+            accountId: 'acc_123',
+            amount: 5000,
+            currency: 'ARS',
+            idempotencyKey: 'withdrawal-001',
+        );
+
+        $first = $useCase($input);
+        $second = $useCase($input);
+
+        self::assertSame($first->operationId, $second->operationId);
+        self::assertSame(10000, $first->balance);
+        self::assertSame(2, $context->ledgerEntries->count());
+    }
+
+    public function test_it_transfers_funds_idempotently(): void
+    {
+        $context = $this->context();
+        $this->createAccount($context, 'acc_123', 'ARS');
+        $this->createAccount($context, 'acc_456', 'ARS');
+        $this->depositFunds($context)(new DepositFundsInput(
+            accountId: 'acc_123',
+            amount: 20000,
+            currency: 'ARS',
+            idempotencyKey: 'deposit-001',
+        ));
+
+        $useCase = $this->transferFunds($context);
+        $input = new TransferFundsInput(
+            fromAccountId: 'acc_123',
+            toAccountId: 'acc_456',
+            amount: 8000,
+            currency: 'ARS',
+            idempotencyKey: 'transfer-001',
+        );
+
+        $first = $useCase($input);
+        $second = $useCase($input);
+
+        self::assertSame($first->operationId, $second->operationId);
+        self::assertSame(12000, $first->balance);
+        self::assertSame(3, $context->ledgerEntries->count());
+    }
+
     private function context(): LedgerUseCaseContext
     {
         return new LedgerUseCaseContext(
